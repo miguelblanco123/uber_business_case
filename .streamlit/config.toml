@@ -1,0 +1,9 @@
+[theme]
+# Uber Eats color palette
+# Primary green: #06C167  |  Black: #000000  |  White: #FFFFFF
+
+primaryColor        = "#06C167"   # Uber Eats green — buttons, sliders, active elements
+backgroundColor     = "#FFFFFF"   # Main content area
+secondaryBackgroundColor = "#F6F6F6"  # Sidebar and input fields
+textColor           = "#000000"   # Primary text
+font                = "sans serif"
