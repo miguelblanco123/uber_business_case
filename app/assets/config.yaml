@@ -1,0 +1,13 @@
+credentials:
+  usernames:
+    user:
+      email: user@uber.com
+      name: User
+      password: "$2b$12$SvHkhyz3TUTK/TNhlZRON.5yvlL1pWa7ktwrup1e2XJUQ9374.5y."
+      type: User
+
+cookie:
+  expiry_days: 1
+  key: uber_atd_dashboard_secret
+  name: uber_atd_auth
+
