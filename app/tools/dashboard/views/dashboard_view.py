@@ -76,15 +76,19 @@ def dashboard_view() -> None:
         min_date = full_df["date"].min()
         max_date = full_df["date"].max()
 
-        # Build Monday-starting week options
-        weeks = _monday_weeks(min_date, max_date)
+        # Build Monday-starting week options — complete weeks only
+        all_weeks = _monday_weeks(min_date, max_date)
+        weeks = [
+            (s, e) for s, e in all_weeks
+            if (e - s).days == 6
+        ]
         week_labels = [_week_label(s, e) for s, e in weeks]
         week_map = dict(zip(week_labels, weeks))
 
         selected_label = st.selectbox(
             "Week (Mon – Sun)",
             options=week_labels,
-            index=len(week_labels) - 1,  # default: most recent week
+            index=len(week_labels) - 1,  # default: most recent complete week
         )
         date_start, date_end = week_map[selected_label]
 

@@ -1,0 +1,37 @@
+{
+  "model": "xgboost",
+  "top_n": 15,
+  "feature_cols": [
+    "dropoff_distance",
+    "total_distance",
+    "pickup_distance",
+    "log_dropoff",
+    "territory_flow_median_atd",
+    "territory_hour_median_atd",
+    "log_total_dist",
+    "merchant_surface",
+    "courier_flow_code",
+    "distance_ratio",
+    "driver_mean_atd",
+    "courier_flow",
+    "driver_median_atd",
+    "hour_local",
+    "territory_code"
+  ],
+  "cat_features": [
+    "merchant_surface",
+    "courier_flow"
+  ],
+  "target": "ATD",
+  "importance_source": "lgbm_gain",
+  "best_iteration": 365,
+  "val_mae": 9.932,
+  "val_rmse": 14.008,
+  "val_mape": 31.96,
+  "val_r2": 0.3329,
+  "lgbm_val_mae": 9.827,
+  "mae_delta_vs_lgbm": 0.105,
+  "sla_threshold_min": 45,
+  "split_date_val_start": "2025-03-31",
+  "split_date_test_start": "2025-04-14"
+}

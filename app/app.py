@@ -35,7 +35,7 @@ def setup_authenticator(config):
 USER_TOOLS = [
     ("Home", "house"),
     ("Dashboard", "bar-chart-line"),
-    # ("ATD Predictor", "bar-chart"),  ← add new tools here
+    ("ATD Predictor", "cpu"),
 ]
 
 
@@ -72,10 +72,9 @@ def render_tool(selected, name):
         )
         dashboard_view()
 
-    # Add new tools below:
-    # elif selected == "ATD Predictor":
-    #     from tools.atd_predictor.views.atd_view import atd_view
-    #     atd_view()
+    elif selected == "ATD Predictor":
+        from tools.predictor.views.predictor_view import predictor_view
+        predictor_view()
 
 
 # ---------------------------------------------------------------------------
@@ -121,6 +120,7 @@ def main():
     st.set_page_config(
         page_title="Uber Eats ATD",
         page_icon="🛵",
+        layout="wide",
         initial_sidebar_state="expanded",
     )
     inject_css()

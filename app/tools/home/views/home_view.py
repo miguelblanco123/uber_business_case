@@ -133,7 +133,9 @@ def home_view(name: str) -> None:
     )
     st.markdown(
         "- **`tools/home/`** -- this walkthrough page.\n"
-        "- **`tools/dashboard/`** -- the ATD analytics dashboard."
+        "- **`tools/dashboard/`** -- the ATD analytics dashboard.\n"
+        "- **`tools/predictor/`** -- live ATD prediction on "
+        "new trips using the trained model."
     )
     st.markdown(
         "Each tool follows the same internal structure to keep "
@@ -186,13 +188,129 @@ def home_view(name: str) -> None:
     st.markdown("---")
     st.header("3. Predictive Model for ATD")
 
-    st.info(
-        "Work in progress. The plan is to train a LightGBM model "
-        "on the historical trip data using features like hour of "
-        "day, day of week, distances, courier type, and geo "
-        "archetype to predict ATD before a trip completes. "
-        "Predictions would then show up in a new dashboard tab "
-        "for operational forecasting."
+    st.markdown(
+        "The goal is to predict ATD **before a trip completes** "
+        "so operations can flag at-risk deliveries early. "
+        "The model is trained on ~990 K historical Mexico trips "
+        "from March–April 2025."
+    )
+
+    st.subheader("Algorithm — XGBoost (reg:absoluteerror)")
+    st.markdown(
+        "The deployed model is an **XGBoost** booster trained on the "
+        "**top 25 features by LightGBM gain importance**. "
+        "A full LightGBM model is first trained on all features to "
+        "rank them; then XGBoost re-trains on only the top 25, "
+        "producing a leaner model with near-identical accuracy."
+    )
+    st.markdown(
+        "- **`reg:absoluteerror`** matches LightGBM's `regression_l1` "
+        "— both minimise MAE, making the comparison fair and keeping "
+        "the model robust to ATD's heavy right tail.\n"
+        "- **Native categorical support** (`enable_categorical=True`) "
+        "handles territory, courier flow, and geo archetype directly "
+        "without one-hot encoding.\n"
+        "- **Histogram-based splitting** (`tree_method=hist`) trains "
+        "on ~800 K rows in minutes on a laptop CPU.\n"
+        "- **25 features vs 49** — a 49% smaller feature set with "
+        "only +0.06 min MAE compared to the full LightGBM model."
+    )
+
+    st.subheader("Feature Engineering (45 features)")
+    st.markdown(
+        "Features fall into four groups:"
+    )
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown(
+            "**Time (6)**  \n"
+            "`hour_local`, `day_of_week`, `is_weekend`, "
+            "`is_peak_hour`, `week_number`, `month`, `time_block`"
+            "\n\n"
+            "**Distance (8)**  \n"
+            "`pickup_distance`, `dropoff_distance`, "
+            "`total_distance`, `distance_ratio`, log transforms, "
+            "`is_long_trip`"
+        )
+    with col2:
+        st.markdown(
+            "**Driver history (16)**  \n"
+            "All-time, 30-day, and 7-day expanding/rolling "
+            "averages of ATD, SLA rate, and trip count per driver. "
+            "Computed with `.expanding().shift(1)` so each row "
+            "only sees past trips — no leakage."
+            "\n\n"
+            "**Encoding (15)**  \n"
+            "Category codes + target-encoded medians for "
+            "territory, geo archetype, and two interaction "
+            "encodings (territory × flow, territory × hour)."
+        )
+
+    st.subheader("Training Setup")
+    st.markdown(
+        "The dataset is split **chronologically** to avoid "
+        "future leakage:"
+    )
+    st.markdown(
+        "| Split | Period | Size |\n"
+        "|-------|--------|------|\n"
+        "| Train | Mar 1 – Mar 30 | ~800 K trips |\n"
+        "| Val   | Mar 31 – Apr 13 | ~100 K trips |\n"
+        "| Test  | Apr 14 – Apr 27 | ~90 K trips |"
+    )
+    st.markdown(
+        "Target-encoded features (territory median ATD, etc.) "
+        "are computed on train-only and mapped to val/test, "
+        "with unseen categories filled by the train global median."
+    )
+    st.markdown(
+        "Training uses `num_boost_round=5000` with early stopping "
+        "on val MAE (patience 100 rounds) and `learning_rate=0.02` "
+        "to allow the model enough rounds to converge."
+    )
+
+    st.subheader("Model Selection Process")
+    st.markdown(
+        "Two models were trained and compared on the same "
+        "held-out validation set:"
+    )
+    st.markdown(
+        "| Model | Features | Val MAE | Val RMSE | Val R² |\n"
+        "|-------|----------|---------|----------|--------|\n"
+        "| LightGBM (all features) | 49 | 9.84 min | 13.78 min | 0.354 |\n"
+        "| **XGBoost top-25** *(deployed)* | **25** | **9.90 min** | **13.65 min** | **0.366** |\n"
+        "| Baseline (global mean) | — | ~13.1 min | — | — |"
+    )
+    st.caption(
+        "XGBoost was chosen: it uses half the features, has a "
+        "marginally better R², and closes the RMSE gap — "
+        "at the cost of only +0.06 min MAE vs LightGBM."
+    )
+
+    st.subheader("Performance")
+    st.code(
+        "Metric              XGBoost top-25\n"
+        "──────────────────────────────────\n"
+        "Val MAE              9.90 min\n"
+        "Val RMSE            13.65 min\n"
+        "Val R²               0.366\n"
+        "Best iteration       662\n"
+        "Features used         25\n"
+        "SLA threshold         45 min",
+        language="text",
+    )
+    st.caption(
+        "An R² of ~0.37 reflects substantial irreducible noise in ATD "
+        "(traffic, restaurant prep time, driver behaviour) that no "
+        "model can capture without real-time signals. Even so, the "
+        "model reduces MAE by ~25% vs the best rule-based baseline."
+    )
+
+    st.subheader("Try it live")
+    st.markdown(
+        "Go to **ATD Predictor** in the sidebar to select trips "
+        "from the validation set and see the model's predictions "
+        "versus the actual ATD values."
     )
 
     # ----------------------------------------------------------------
