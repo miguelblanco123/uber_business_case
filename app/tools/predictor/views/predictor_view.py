@@ -141,14 +141,14 @@ def _render_model_metrics(meta: dict) -> None:
               help="Fraction of ATD variance explained by the model")
 
     with st.expander(
-        f"Model details — XGBoost · top {meta.get('top_n', '?')} features "
+        f"Model details — XGBoost · top 25 features "
         f"· {meta['best_iteration']} trees"
     ):
         left, right = st.columns(2)
         with left:
             st.markdown(
                 f"**Algorithm** XGBoost (`reg:absoluteerror`)  \n"
-                f"**Feature selection** top-{meta.get('top_n', '?')} "
+                f"**Feature selection** top-25 "
                 f"by LightGBM gain  \n"
                 f"**Best iteration** {meta['best_iteration']}  \n"
                 f"**Val split** {meta.get('split_date_val_start', '—')} "
