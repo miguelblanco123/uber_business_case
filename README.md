@@ -126,7 +126,6 @@ JOIN dwh.dim_city dc
 JOIN kirby_external_data.cities_strategy_region csr
     ON dc.city_id = csr.city_id
 ```
-```
 
 ## 3. App Architecture & Usage
 
