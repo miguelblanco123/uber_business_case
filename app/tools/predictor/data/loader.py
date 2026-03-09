@@ -12,7 +12,7 @@ _ROOT = Path(os.path.normpath(os.path.join(_HERE, "..", "..", "..", "..")))
 
 
 VAL_PATH   = _ROOT / "data" / "processed" / "val.parquet"
-MODEL_PATH = _ROOT / "model" / "minmax_scaler.pkl"
+MODEL_PATH = _ROOT / "model" / "xgb_top25_model.pkl.pkl"
 META_PATH  = _ROOT / "model" / "model_metadata.json"
 
 _DISPLAY_COLS = [
